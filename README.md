@@ -60,6 +60,10 @@ and diff the resulting files to identify critical changes that could break funct
 would be of course manualy checking all strings.
 
 ## Usage
+### Quick Build Bat (Version 810)
+
+<img width="1479" height="760" alt="image" src="https://github.com/user-attachments/assets/c8c3599b-3060-47ca-a590-8579694b408e" />
+
 
 ### Quick Start (Version 810)
 ```bash
