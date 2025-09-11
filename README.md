@@ -1,6 +1,6 @@
 # DBI Multilingual version Translation
 
-This repository contains an English translation for the DBI homebrew application (version 810) for Nintendo Switch.
+This repository contains Multilingual translation version for the DBI homebrew application (version 810) for Nintendo Switch.
 
 Was updating my Switch installation and wanted to bump DBI version from original 500-something. So, fired up Ghidra, 
 investigated suspicious chunk of referenced memory and sure enough, there was naive xor cipher on compressed strings.
