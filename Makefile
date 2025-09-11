@@ -3,6 +3,7 @@ CC = gcc
 CFLAGS =-std=gnu11 \
 	-g \
 	-I$(SRCDIR)/inc \
+	-Ilibs/zstd/include \
 	-Wall \
 	-Wextra \
 	-Wno-unused-parameter \
@@ -10,7 +11,7 @@ CFLAGS =-std=gnu11 \
 	-Wno-sign-compare \
 	-Wno-unused-function
 
-LDLIBS =-lzstd
+LDLIBS = libs/zstd/static/libzstd_static.lib
 
 SRCDIR = src
 BUILDDIR = build
@@ -43,6 +44,7 @@ $(TEMPDIR):
 
 clean:
 	@rm -rf $(BUILDDIR) $(TEMPDIR)
+	@rm -f $(BINDIR)/libzstd.dll
 
 run: $(TARGET)
 	@$(TARGET)
@@ -56,5 +58,42 @@ translate-810: $(TARGET) | $(TEMPDIR)
 
 debug: $(TARGET)
 	@valgrind $(TARGET)
+
+TRANSLATE_FILES = $(wildcard translate/rec6.810.*.txt)
+TRANSLATE_LANGS = $(sort $(patsubst translate/rec6.810.%.txt,%,$(TRANSLATE_FILES)))
+
+.PHONY: translate-all clean-translate list-languages translate-%
+
+translate-all: $(TARGET)
+	@echo "Available translation languages: $(TRANSLATE_LANGS)"
+	@for lang in $(TRANSLATE_LANGS); do \
+		if [ "$$lang" != "ru" ]; then \
+			echo "Processing language: $$lang"; \
+			$(MAKE) translate-810 LANG=$$lang || exit 1; \
+		fi; \
+	done
+	@echo "All translations completed successfully!"
+
+clean-translate:
+	@rm -rf $(TEMPDIR)/DBI_810
+	@echo "Cleaned translation temporary files"
+
+list-languages:
+	@echo "Available translation languages:"
+	@for lang in $(TRANSLATE_LANGS); do \
+		echo "  $$lang"; \
+	done
+
+translate-%: $(TARGET)
+	@lang=$*; \
+	if [ ! -f "translate/rec6.810.$$lang.txt" ]; then \
+		echo "Error: Translation file for language '$$lang' not found"; \
+		echo "Available languages: $(TRANSLATE_LANGS)"; \
+		exit 1; \
+	fi; \
+	$(MAKE) translate-810 LANG=$$lang
+
+quiet:
+	@$(MAKE) --no-print-directory all
 
 .PHONY: all clean
