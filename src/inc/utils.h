@@ -12,7 +12,8 @@
 
 #ifndef UTILS_H
 #define UTILS_H
-
+#include <sys/stat.h>  // 添加 mode_t 定义
+#include <stdarg.h>    // 添加 va_list 定义
 #include <stdlib.h>
 
 int mkpath(mode_t mode, const char* fmt, ...);

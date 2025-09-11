@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>  // 添加 mode_t 定义
 
 #include "convert.h"
 #include "log.h"
@@ -183,7 +184,7 @@ int convert(const char * path_in, const char * path_out, const char * path_out_k
     
     if(path_out_keys) {
         dst_keys = fopen(path_out_keys, "w+");
-        if(!dst) {
+        if(!dst_keys) {
             lf_e("failed to open '%s' for writing", path_out_keys);
             mf_free(in);
             fclose(dst);
