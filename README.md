@@ -1,7 +1,7 @@
 ![License](https://img.shields.io/badge/license-GPLv2.0-brightgreen.svg)
 ![Domain](https://img.shields.io/badge/Software%20Development-blue.svg)
 ![Language](https://img.shields.io/badge/Language-C%20%2F%20C%2B%2B-lightgrey.svg)
-[![Latest Version](https://img.shields.io/github/v/release/sskyNS/RoastDuck-CFWPack?label=latest%20version&color=blue)](https://github.com/sskyNS/RoastDuck-CFWPack/releases/latest)
+[![Latest Version](https://img.shields.io/github/v/release/sskyNS/RoastDuck-CFWPack?label=latest%20version&color=blue)](https://github.com/sskyNS/DBIPatcher/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/sskyNS/DBIPatcher/total?color=6f42c1)](https://github.com/sskyNS/DBIPatcher/graphs/traffic)
 [![GitHub issues](https://img.shields.io/github/issues/sskyNS/DBIPatcher?color=222222)](https://github.com/sskyNS/DBIPatcher/issues)
 [![GitHub stars](https://img.shields.io/github/stars/sskyNS/DBIPatcher)](https://github.com/sskyNS/DBIPatcher/stargazers)
