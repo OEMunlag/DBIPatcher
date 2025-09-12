@@ -1,3 +1,11 @@
+![License](https://img.shields.io/badge/license-GPLv2.0-brightgreen.svg)
+![Domain](https://img.shields.io/badge/Software%20Development-blue.svg)
+![Language](https://img.shields.io/badge/Language-C%20%2F%20C%2B%2B-lightgrey.svg)
+[![Latest Version](https://img.shields.io/github/v/release/sskyNS/RoastDuck-CFWPack?label=latest%20version&color=blue)](https://github.com/sskyNS/RoastDuck-CFWPack/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/sskyNS/DBIPatcher/total?color=6f42c1)](https://github.com/sskyNS/DBIPatcher/graphs/traffic)
+[![GitHub issues](https://img.shields.io/github/issues/sskyNS/DBIPatcher?color=222222)](https://github.com/sskyNS/DBIPatcher/issues)
+[![GitHub stars](https://img.shields.io/github/stars/sskyNS/DBIPatcher)](https://github.com/sskyNS/DBIPatcher/stargazers)
+
 # DBI Multilingual version Translation
 ![2025083113480600-DB1426D1DFD034027CECDE9C2DD914B8](https://github.com/user-attachments/assets/8180edf0-c2eb-4573-b449-0f86138f5065)
 ![2025083115152500-DB1426D1DFD034027CECDE9C2DD914B8](https://github.com/user-attachments/assets/36725a1d-8a40-4a8c-919d-62972dbccfb0)
