@@ -17,18 +17,30 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Build zstd for Windows
+    - name: Verify pre-built zstd
       run: |
-        cd libs/zstd
-        mkdir -p build
-        cd build
-        cmake .. -DZSTD_BUILD_STATIC=ON -DZSTD_BUILD_SHARED=OFF
-        cmake --build . --config Release
-
+        if (Test-Path libs/zstd/zstd.exe) {
+            echo "Using pre-built zstd.exe"
+            Get-Item libs/zstd/zstd.exe
+        } else {
+            echo "Error: Pre-built zstd.exe not found"
+            exit 1
+        }
+        
     - name: Build for Windows
       run: |
         make clean
         make -j4
+        
+    - name: Verify build output
+      run: |
+        if (Test-Path bin/dbipatcher.exe) {
+            echo "Build successful: dbipatcher.exe found"
+            Get-Item bin/dbipatcher.exe
+        } else {
+            echo "Build failed: dbipatcher.exe not found"
+            exit 1
+        }
         
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
@@ -36,7 +48,7 @@ jobs:
         name: dbipatcher-windows
         path: |
           bin/dbipatcher.exe
-          libs/zstd/build/lib/Release/libzstd_static.lib
+          libs/zstd/zstd.exe
         if-no-files-found: error
 
   build-linux:
@@ -76,7 +88,6 @@ jobs:
       run: |
         brew update
         brew install make zstd
-        # 设置环境变量以确保Makefile能正确检测Homebrew路径
         echo "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH" >> $GITHUB_ENV
         
     - name: Build for macOS
