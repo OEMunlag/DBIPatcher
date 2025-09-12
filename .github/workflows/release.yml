@@ -17,23 +17,60 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install MinGW
+    - name: Install MinGW and verify tools
       run: |
         choco install mingw -y
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+        # 验证工具可用性
+        gcc --version
+        make --version
+        
+    - name: Verify source files and directory structure
+      run: |
+        # 检查源代码目录结构
+        dir src /s
+        # 检查源文件是否存在
+        if (Test-Path src\*.c) {
+            echo "C source files found in src/"
+            dir src\*.c
+        }
+        if (Test-Path src\inc\*.h) {
+            echo "Header files found in src/inc/"
+        }
 
     - name: Verify pre-built zstd DLL
       run: |
-        if (Test-Path libs/zstd/dll/libzstd.dll) { echo "Pre-built libzstd.dll found"; Get-Item libs/zstd/dll/libzstd.dll; } else { echo "Error: Pre-built libzstd.dll not found"; exit 1; }
+        if (Test-Path libs/zstd/dll/libzstd.dll) { 
+            echo "Pre-built libzstd.dll found" 
+            Get-Item libs/zstd/dll/libzstd.dll
+        } else { 
+            echo "Error: Pre-built libzstd.dll not found" 
+            exit 1 
+        }
 
     - name: Build for Windows
       run: |
         make clean
-        make -j4
+        # 显示详细构建过程
+        make -j4 V=1
 
     - name: Verify build output
       run: |
-        if (Test-Path bin/dbipatcher.exe) { echo "Build successful: dbipatcher.exe found"; Get-Item bin/dbipatcher.exe; if (Test-Path bin/libzstd.dll) { echo "libzstd.dll copied to bin directory"; } } else { echo "Build failed: dbipatcher.exe not found"; exit 1; }
+        if (Test-Path bin/dbipatcher.exe) { 
+            echo "Build successful: dbipatcher.exe found" 
+            Get-Item bin/dbipatcher.exe
+            if (Test-Path bin/libzstd.dll) { 
+                echo "libzstd.dll copied to bin directory" 
+            }
+        } else { 
+            echo "Build failed: dbipatcher.exe not found" 
+            # 检查对象文件是否生成
+            if (Test-Path build\*.o) {
+                echo "Object files found:"
+                dir build
+            }
+            exit 1 
+        }
 
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
