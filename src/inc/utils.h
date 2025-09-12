@@ -12,11 +12,19 @@
 
 #ifndef UTILS_H
 #define UTILS_H
+
 #include <sys/stat.h>  // 添加 mode_t 定义
 #include <stdarg.h>    // 添加 va_list 定义
 #include <stdlib.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    // Windows上的mode_t定义
+    #ifndef mode_t
+    typedef unsigned short mode_t;
+    #endif
+#endif
+
 int mkpath(mode_t mode, const char* fmt, ...);
 
-#endif /* UTILS_H */
+#endif // UTILS_H
 
