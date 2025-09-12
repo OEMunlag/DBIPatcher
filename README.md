@@ -74,7 +74,7 @@ would be of course manualy checking all strings.
 
 <img width="1479" height="760" alt="image" src="https://github.com/user-attachments/assets/c8c3599b-3060-47ca-a590-8579694b408e" />
 
-**Make sure you have fully downloaded all the files from this repository, and run the build script in the root directory to quickly build!**
+```Make sure you have fully downloaded all the files from this repository, and run the build script in the root directory to quickly build!```
 
 ### Quick Start (Version 810)
 ```bash
