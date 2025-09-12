@@ -3,10 +3,10 @@ name: Release DBI Patcher
 on:
   push:
     tags:
-      - 'v*' # 当推送v开头的tag时触发
+      - 'v*'
 
 permissions:
-  contents: write # 允许工作流写入内容（创建release）:cite[1]
+  contents: write
 
 jobs:
   build-windows:
@@ -14,6 +14,16 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build zstd for Windows
+      run: |
+        cd libs/zstd
+        mkdir -p build
+        cd build
+        cmake .. -DZSTD_BUILD_STATIC=ON -DZSTD_BUILD_SHARED=OFF
+        cmake --build . --config Release
 
     - name: Build for Windows
       run: |
@@ -25,8 +35,8 @@ jobs:
       with:
         name: dbipatcher-windows
         path: |
-          bin/
-          libs/zstd/dll/libzstd.dll
+          bin/dbipatcher.exe
+          libs/zstd/build/lib/Release/libzstd_static.lib
         if-no-files-found: error
 
   build-linux:
@@ -34,11 +44,13 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential make
+        sudo apt-get install -y build-essential make libzstd-dev
 
     - name: Build for Linux
       run: |
@@ -49,7 +61,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: dbipatcher-linux
-        path: bin/
+        path: bin/dbipatcher
         if-no-files-found: error
 
   build-macos:
@@ -57,11 +69,13 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Install dependencies
       run: |
         brew update
-        brew install make
+        brew install make zstd
 
     - name: Build for macOS
       run: |
@@ -72,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: dbipatcher-macos
-        path: bin/
+        path: bin/dbipatcher
         if-no-files-found: error
 
   create-release:
@@ -117,7 +131,6 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          artifacts/dbipatcher-windows/bin/dbipatcher.exe
-          artifacts/dbipatcher-windows/libs/zstd/dll/libzstd.dll
-          artifacts/dbipatcher-linux/bin/dbipatcher
-          artifacts/dbipatcher-macos/bin/dbipatcher
+          artifacts/dbipatcher-windows/dbipatcher.exe
+          artifacts/dbipatcher-linux/dbipatcher
+          artifacts/dbipatcher-macos/dbipatcher
