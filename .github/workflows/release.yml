@@ -21,53 +21,63 @@ jobs:
       run: |
         choco install mingw -y
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
-        # 验证工具可用性
         gcc --version
         make --version
         
     - name: Verify source files and directory structure
       run: |
-        # 检查源代码目录结构
-        dir src /s
-        # 检查源文件是否存在
-        if (Test-Path src\*.c) {
-            echo "C source files found in src/"
-            dir src\*.c
+        Write-Host "Checking source directory structure:"
+        Get-ChildItem -Path . -Recurse -Directory | Where-Object { $_.Name -eq "src" } | ForEach-Object { 
+            Write-Host "Found src directory at: $($_.FullName)"
+            Get-ChildItem -Path $_.FullName -Recurse -File
         }
-        if (Test-Path src\inc\*.h) {
-            echo "Header files found in src/inc/"
+        
+        if (Test-Path "src\*.c") {
+            Write-Host "C source files found in src/:"
+            Get-ChildItem -Path "src" -Filter "*.c"
+        } else {
+            Write-Host "No C source files found in src/"
+        }
+        
+        if (Test-Path "src\inc\*.h") {
+            Write-Host "Header files found in src/inc/:"
+            Get-ChildItem -Path "src\inc" -Filter "*.h"
+        } else {
+            Write-Host "No header files found in src/inc/"
         }
 
     - name: Verify pre-built zstd DLL
       run: |
-        if (Test-Path libs/zstd/dll/libzstd.dll) { 
-            echo "Pre-built libzstd.dll found" 
-            Get-Item libs/zstd/dll/libzstd.dll
+        if (Test-Path "libs/zstd/dll/libzstd.dll") { 
+            Write-Host "Pre-built libzstd.dll found" 
+            Get-Item "libs/zstd/dll/libzstd.dll"
         } else { 
-            echo "Error: Pre-built libzstd.dll not found" 
+            Write-Host "Error: Pre-built libzstd.dll not found" 
+            Write-Host "Available files in libs/zstd/dll/:"
+            if (Test-Path "libs/zstd/dll") {
+                Get-ChildItem -Path "libs/zstd/dll"
+            }
             exit 1 
         }
 
     - name: Build for Windows
       run: |
         make clean
-        # 显示详细构建过程
-        make -j4 V=1
+        make -j4
 
     - name: Verify build output
       run: |
-        if (Test-Path bin/dbipatcher.exe) { 
-            echo "Build successful: dbipatcher.exe found" 
-            Get-Item bin/dbipatcher.exe
-            if (Test-Path bin/libzstd.dll) { 
-                echo "libzstd.dll copied to bin directory" 
+        if (Test-Path "bin/dbipatcher.exe") { 
+            Write-Host "Build successful: dbipatcher.exe found" 
+            Get-Item "bin/dbipatcher.exe"
+            if (Test-Path "bin/libzstd.dll") { 
+                Write-Host "libzstd.dll copied to bin directory" 
             }
         } else { 
-            echo "Build failed: dbipatcher.exe not found" 
-            # 检查对象文件是否生成
-            if (Test-Path build\*.o) {
-                echo "Object files found:"
-                dir build
+            Write-Host "Build failed: dbipatcher.exe not found" 
+            if (Test-Path "build") {
+                Write-Host "Build directory contents:"
+                Get-ChildItem -Path "build" -Recurse
             }
             exit 1 
         }
