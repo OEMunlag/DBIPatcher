@@ -8,6 +8,7 @@ BREW_PREFIX := $(shell if [ "$(UNAME_S)" = "Darwin" ] && command -v brew >/dev/n
 ifeq ($(UNAME_S),Linux)
     LDLIBS = -lzstd
     EXE_EXT =
+    CFLAGS += -DPLATFORM_LINUX
 endif
 ifeq ($(UNAME_S),Darwin)
     ifneq ($(BREW_PREFIX),)
@@ -16,11 +17,15 @@ ifeq ($(UNAME_S),Darwin)
     endif
     LDLIBS = -lzstd
     EXE_EXT =
+
+    CFLAGS += -DPLATFORM_MACOS
 endif
 ifeq ($(OS),Windows_NT)
     LDFLAGS += -Llibs/zstd/dll
     LDLIBS = -lzstd
     EXE_EXT = .exe
+
+    CFLAGS += -DPLATFORM_WINDOWS
 endif
 
 ifndef LDLIBS
@@ -32,7 +37,6 @@ BUILDDIR = build
 BINDIR = bin
 TEMPDIR = temp
 
-# 修复文件查找 - 使用Windows兼容的方法
 ifeq ($(OS),Windows_NT)
     SOURCES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c)
 else
