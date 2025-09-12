@@ -3,133 +3,121 @@ name: Release DBI Patcher
 on:
   push:
     tags:
-      - 'v*' 
+      - 'v*' # 当推送v开头的tag时触发
 
 permissions:
-  contents: write 
+  contents: write # 允许工作流写入内容（创建release）:cite[1]
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: "Windows Build"
-            os: windows-latest
-            artifact_name: dbipatcher-windows
-            binary_name: dbipatcher.exe
-            
-          - name: "Linux Build"
-            os: ubuntu-latest
-            artifact_name: dbipatcher-linux
-            binary_name: dbipatcher
-            
-          - name: "macOS Build"
-            os: macos-latest
-            artifact_name: dbipatcher-macos
-            binary_name: dbipatcher
-
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-
+  build-windows:
+    runs-on: windows-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
-    - name: Set up build environment
-      run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          sudo apt-get update
-          sudo apt-get install -y build-essential
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-          brew update
-          brew install make gcc
-        fi
-        # Windows
-
-    - name: Build the project
+    - name: Build for Windows
       run: |
         make clean
         make -j4
-        if [ -f "bin/dbipatcher" ]; then
-          mkdir -p release/
-          cp bin/dbipatcher release/dbipatcher-${{ runner.os }}
-        fi
-        if [ -f "bin/dbipatcher.exe" ]; then
-          mkdir -p release/
-          cp bin/dbipatcher.exe release/dbipatcher-windows.exe
-        fi
-
-    - name: Upload build artifacts
+        
+    - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.artifact_name }}
+        name: dbipatcher-windows
         path: |
-          release/
           bin/
+          libs/zstd/dll/libzstd.dll
+        if-no-files-found: error
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential make
+
+    - name: Build for Linux
+      run: |
+        make clean
+        make -j4
+        
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dbipatcher-linux
+        path: bin/
+        if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew install make
+
+    - name: Build for macOS
+      run: |
+        make clean
+        make -j4
+        
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dbipatcher-macos
+        path: bin/
         if-no-files-found: error
 
   create-release:
     runs-on: ubuntu-latest
-    needs: build-and-release
+    needs: [build-windows, build-linux, build-macos]
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download all build artifacts
+    - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
 
-    - name: Create release
-      id: create_release
+    - name: List downloaded files
+      run: |
+        find artifacts -type f | sort
+
+    - name: Create Release
       uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
+        name: DBI Patcher ${{ github.ref_name }}
         body: |
-          DBI Patcher ${{ github.ref_name }}
+          Automated build of DBI Patcher ${{ github.ref_name }}
           
-          Automated build containing binaries for:
+          **Platforms included:**
           - Windows (x86_64)
-          - Linux (x86_64) 
+          - Linux (x86_64)
           - macOS (x86_64)
           
-          **How to use:**
-          1. Download the appropriate binary for your platform
-          2. Make it executable (on Linux/macOS): `chmod +x dbipatcher`
-          3. Run with: `./dbipatcher [options]`
+          **Usage:**
+          ```bash
+          # Linux/macOS
+          chmod +x dbipatcher
+          ./dbipatcher --help
+          
+          # Windows
+          dbipatcher.exe --help
+          ```
         draft: false
         prerelease: false
-
-    - name: Upload Windows binary
-      uses: softprops/action-gh-release@v1
-      with:
-        files: artifacts/dbipatcher-windows/dbipatcher-windows.exe
-        tag_name: ${{ github.ref_name }}
-
-    - name: Upload Linux binary
-      uses: softprops/action-gh-release@v1
-      with:
-        files: artifacts/dbipatcher-linux/dbipatcher
-        tag_name: ${{ github.ref_name }}
-
-    - name: Upload macOS binary
-      uses: softprops/action-gh-release@v1
-      with:
-        files: artifacts/dbipatcher-macos/dbipatcher
-        tag_name: ${{ github.ref_name }}
-
-    - name: Upload additional files
-      uses: softprops/action-gh-release@v1
-      with:
         files: |
-          README.md
-          LICENSE
-          translate/rec6.810.*.txt
-        tag_name: ${{ github.ref_name }}
+          artifacts/dbipatcher-windows/bin/dbipatcher.exe
+          artifacts/dbipatcher-windows/libs/zstd/dll/libzstd.dll
+          artifacts/dbipatcher-linux/bin/dbipatcher
+          artifacts/dbipatcher-macos/bin/dbipatcher
