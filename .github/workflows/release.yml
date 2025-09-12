@@ -148,16 +148,29 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
+  
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
-
+  
     - name: List downloaded files
       run: |
         find artifacts -type f | sort
-
+  
+    # 新增步骤：准备 Release 文件
+    - name: Prepare release assets
+      run: |
+        mkdir -p release_assets
+        # 复制 Windows 文件
+        cp artifacts/dbipatcher-windows/dbipatcher.exe release_assets/dbipatcher-windows-${{ github.ref_name }}.exe
+        # 复制 Linux 文件并重命名
+        cp artifacts/dbipatcher-linux/dbipatcher release_assets/dbipatcher-linux-${{ github.ref_name }}
+        # 复制 macOS 文件并重命名
+        cp artifacts/dbipatcher-macos/dbipatcher release_assets/dbipatcher-macos-${{ github.ref_name }}
+        # 查看准备后的文件
+        ls -la release_assets/
+  
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
@@ -165,28 +178,26 @@ jobs:
         name: DBI Patcher ${{ github.ref_name }}
         body: |
           Automated build of DBI Patcher ${{ github.ref_name }}
-
+  
           **Platforms included:**
           - Windows (x86_64)
           - Linux (x86_64)
           - macOS (x86_64)
-
+  
           **Usage:**
           ```bash
           # Linux
-          chmod +x dbipatcher-linux
-          ./dbipatcher-linux --help
+          chmod +x dbipatcher-linux-${{ github.ref_name }}
+          ./dbipatcher-linux-${{ github.ref_name }} --help
           
           # macOS
-          chmod +x dbipatcher-macos
-          ./dbipatcher-macos --help
-
+          chmod +x dbipatcher-macos-${{ github.ref_name }}
+          ./dbipatcher-macos-${{ github.ref_name }} --help
+  
           # Windows
-          dbipatcher.exe --help
+          dbipatcher-windows-${{ github.ref_name }}.exe --help
           ```
         draft: false
         prerelease: false
         files: |
-          artifacts/dbipatcher-windows/dbipatcher.exe
-          artifacts/dbipatcher-linux/dbipatcher:dbipatcher-linux
-          artifacts/dbipatcher-macos/dbipatcher:dbipatcher-macos
+          release_assets/*
