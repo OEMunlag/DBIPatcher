@@ -17,38 +17,31 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Verify pre-built zstd
+    - name: Install MinGW
       run: |
-        if (Test-Path libs/zstd/zstd.exe) {
-            echo "Using pre-built zstd.exe"
-            Get-Item libs/zstd/zstd.exe
-        } else {
-            echo "Error: Pre-built zstd.exe not found"
-            exit 1
-        }
-        
+        choco install mingw -y
+        echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $env:GITHUB_PATH
+
+    - name: Verify pre-built zstd DLL
+      run: |
+        if (Test-Path libs/zstd/dll/zstd.dll) { echo "Pre-built zstd.dll found"; Get-Item libs/zstd/dll/zstd.dll; } else { echo "Error: Pre-built zstd.dll not found"; exit 1; }
+
     - name: Build for Windows
       run: |
         make clean
         make -j4
-        
+
     - name: Verify build output
       run: |
-        if (Test-Path bin/dbipatcher.exe) {
-            echo "Build successful: dbipatcher.exe found"
-            Get-Item bin/dbipatcher.exe
-        } else {
-            echo "Build failed: dbipatcher.exe not found"
-            exit 1
-        }
-        
+        if (Test-Path bin/dbipatcher.exe) { echo "Build successful: dbipatcher.exe found"; Get-Item bin/dbipatcher.exe; if (Test-Path bin/zstd.dll) { echo "zstd.dll copied to bin directory"; } } else { echo "Build failed: dbipatcher.exe not found"; exit 1; }
+
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
       with:
         name: dbipatcher-windows
         path: |
           bin/dbipatcher.exe
-          libs/zstd/zstd.exe
+          bin/zstd.dll
         if-no-files-found: error
 
   build-linux:
@@ -68,7 +61,7 @@ jobs:
       run: |
         make clean
         make -j4
-        
+
     - name: Upload Linux artifact
       uses: actions/upload-artifact@v4
       with:
@@ -89,12 +82,12 @@ jobs:
         brew update
         brew install make zstd
         echo "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH" >> $GITHUB_ENV
-        
+
     - name: Build for macOS
       run: |
         make clean
         make -j4
-        
+
     - name: Upload macOS artifact
       uses: actions/upload-artifact@v4
       with:
@@ -105,7 +98,6 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     needs: [build-windows, build-linux, build-macos]
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -126,18 +118,18 @@ jobs:
         name: DBI Patcher ${{ github.ref_name }}
         body: |
           Automated build of DBI Patcher ${{ github.ref_name }}
-          
+
           **Platforms included:**
           - Windows (x86_64)
           - Linux (x86_64)
           - macOS (x86_64)
-          
+
           **Usage:**
           ```bash
           # Linux/macOS
           chmod +x dbipatcher
           ./dbipatcher --help
-          
+
           # Windows
           dbipatcher.exe --help
           ```
