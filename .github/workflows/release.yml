@@ -24,7 +24,7 @@ jobs:
 
     - name: Verify pre-built zstd DLL
       run: |
-        if (Test-Path libs/zstd/dll/zstd.dll) { echo "Pre-built zstd.dll found"; Get-Item libs/zstd/dll/zstd.dll; } else { echo "Error: Pre-built zstd.dll not found"; exit 1; }
+        if (Test-Path libs/zstd/dll/libzstd.dll) { echo "Pre-built libzstd.dll found"; Get-Item libs/zstd/dll/libzstd.dll; } else { echo "Error: Pre-built libzstd.dll not found"; exit 1; }
 
     - name: Build for Windows
       run: |
@@ -33,7 +33,7 @@ jobs:
 
     - name: Verify build output
       run: |
-        if (Test-Path bin/dbipatcher.exe) { echo "Build successful: dbipatcher.exe found"; Get-Item bin/dbipatcher.exe; if (Test-Path bin/zstd.dll) { echo "zstd.dll copied to bin directory"; } } else { echo "Build failed: dbipatcher.exe not found"; exit 1; }
+        if (Test-Path bin/dbipatcher.exe) { echo "Build successful: dbipatcher.exe found"; Get-Item bin/dbipatcher.exe; if (Test-Path bin/libzstd.dll) { echo "libzstd.dll copied to bin directory"; } } else { echo "Build failed: dbipatcher.exe not found"; exit 1; }
 
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
