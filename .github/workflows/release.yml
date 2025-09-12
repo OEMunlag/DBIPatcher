@@ -173,9 +173,13 @@ jobs:
 
           **Usage:**
           ```bash
-          # Linux/macOS
-          chmod +x dbipatcher
-          ./dbipatcher --help
+          # Linux
+          chmod +x dbipatcher-linux
+          ./dbipatcher-linux --help
+          
+          # macOS
+          chmod +x dbipatcher-macos
+          ./dbipatcher-macos --help
 
           # Windows
           dbipatcher.exe --help
@@ -184,5 +188,5 @@ jobs:
         prerelease: false
         files: |
           artifacts/dbipatcher-windows/dbipatcher.exe
-          artifacts/dbipatcher-linux/dbipatcher
-          artifacts/dbipatcher-macos/dbipatcher
+          artifacts/dbipatcher-linux/dbipatcher:dbipatcher-linux
+          artifacts/dbipatcher-macos/dbipatcher:dbipatcher-macos
