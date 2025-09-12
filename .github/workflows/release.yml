@@ -41,7 +41,7 @@ jobs:
         name: dbipatcher-windows
         path: |
           bin/dbipatcher.exe
-          bin/zstd.dll
+          bin/libzstd.dll
         if-no-files-found: error
 
   build-linux:
