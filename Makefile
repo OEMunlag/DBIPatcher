@@ -11,7 +11,24 @@ CFLAGS =-std=gnu11 \
 	-Wno-sign-compare \
 	-Wno-unused-function
 
-LDLIBS = libs/zstd/static/libzstd_static.lib
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+    LDLIBS = -lzstd
+    EXE_EXT =
+endif
+ifeq ($(UNAME_S),Darwin)
+    LDLIBS = -lzstd
+    EXE_EXT =
+endif
+ifeq ($(OS),Windows_NT)
+    LDLIBS = libs/zstd/static/libzstd_static.lib
+    EXE_EXT = .exe
+endif
+
+ifndef LDLIBS
+    LDLIBS = -lzstd
+endif
 
 SRCDIR = src
 BUILDDIR = build
@@ -22,7 +39,7 @@ SOURCES = $(shell find $(SRCDIR) -name '*.c')
 
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
 
-TARGET = $(BINDIR)/dbipatcher
+TARGET = $(BINDIR)/dbipatcher$(EXE_EXT)
 
 all: $(TARGET)
 
@@ -44,6 +61,7 @@ $(TEMPDIR):
 
 clean:
 	@rm -rf $(BUILDDIR) $(TEMPDIR)
+	@rm -f $(BINDIR)/dbipatcher $(BINDIR)/dbipatcher.exe
 	@rm -f $(BINDIR)/libzstd.dll
 
 run: $(TARGET)
@@ -96,4 +114,4 @@ translate-%: $(TARGET)
 quiet:
 	@$(MAKE) --no-print-directory all
 
-.PHONY: all clean
+.PHONY: all clean run debug
