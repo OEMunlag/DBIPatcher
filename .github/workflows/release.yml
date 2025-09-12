@@ -64,32 +64,32 @@ jobs:
         path: bin/dbipatcher
         if-no-files-found: error
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+build-macos:
+  runs-on: macos-latest
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+    with:
+      submodules: recursive
 
-    - name: Install dependencies
-      run: |
-        brew update
-        brew install make zstd
-        echo "LDFLAGS=-L$(brew --prefix)/opt/zstd/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I$(brew --prefix)/opt/zstd/include" >> $GITHUB_ENV
-        
-    - name: Build for macOS
-      run: |
-        make clean
-        make -j4
-        
-    - name: Upload macOS artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: dbipatcher-macos
-        path: bin/dbipatcher
-        if-no-files-found: error
+  - name: Install dependencies
+    run: |
+      brew update
+      brew install make zstd
+      # 设置环境变量以确保Makefile能正确检测Homebrew路径
+      echo "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH" >> $GITHUB_ENV
+      
+  - name: Build for macOS
+    run: |
+      make clean
+      make -j4
+      
+  - name: Upload macOS artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: dbipatcher-macos
+      path: bin/dbipatcher
+      if-no-files-found: error
 
   create-release:
     runs-on: ubuntu-latest
