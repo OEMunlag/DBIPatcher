@@ -1,15 +1,6 @@
 CC = gcc
 
-CFLAGS =-std=gnu11 \
-	-g \
-	-I$(SRCDIR)/inc \
-	-Ilibs/zstd/include \
-	-Wall \
-	-Wextra \
-	-Wno-unused-parameter \
-	-Wno-missing-field-initializers \
-	-Wno-sign-compare \
-	-Wno-unused-function
+CFLAGS =-std=gnu11 -g -I$(SRCDIR)/inc -Ilibs/zstd/include -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-unused-function
 
 UNAME_S := $(shell uname -s)
 BREW_PREFIX := $(shell if [ "$(UNAME_S)" = "Darwin" ] && command -v brew >/dev/null 2>&1; then brew --prefix; else echo ""; fi)
@@ -27,7 +18,8 @@ ifeq ($(UNAME_S),Darwin)
     EXE_EXT =
 endif
 ifeq ($(OS),Windows_NT)
-    LDLIBS = libs/zstd/static/libzstd_static.lib
+    LDFLAGS += -Llibs/zstd/dll
+    LDLIBS = -lzstd
     EXE_EXT = .exe
 endif
 
@@ -50,6 +42,9 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BUILDDIR) $(BINDIR)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) $(LDLIBS)
+	ifeq ($(OS),Windows_NT)
+		@if [ -f "libs/zstd/dll/zstd.dll" ]; then cp libs/zstd/dll/zstd.dll $(BINDIR)/; fi
+	endif
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	@mkdir -p $(dir $@)
@@ -67,7 +62,7 @@ $(TEMPDIR):
 clean:
 	@rm -rf $(BUILDDIR) $(TEMPDIR)
 	@rm -f $(BINDIR)/dbipatcher $(BINDIR)/dbipatcher.exe
-	@rm -f $(BINDIR)/libzstd.dll
+	@rm -f $(BINDIR)/zstd.dll
 
 run: $(TARGET)
 	@$(TARGET)
@@ -89,12 +84,7 @@ TRANSLATE_LANGS = $(sort $(patsubst translate/rec6.810.%.txt,%,$(TRANSLATE_FILES
 
 translate-all: $(TARGET)
 	@echo "Available translation languages: $(TRANSLATE_LANGS)"
-	@for lang in $(TRANSLATE_LANGS); do \
-		if [ "$$lang" != "ru" ]; then \
-			echo "Processing language: $$lang"; \
-			$(MAKE) translate-810 LANG=$$lang || exit 1; \
-		fi; \
-	done
+	@for lang in $(TRANSLATE_LANGS); do if [ "$$lang" != "ru" ]; then echo "Processing language: $$lang"; $(MAKE) translate-810 LANG=$$lang || exit 1; fi; done
 	@echo "All translations completed successfully!"
 
 clean-translate:
@@ -103,18 +93,10 @@ clean-translate:
 
 list-languages:
 	@echo "Available translation languages:"
-	@for lang in $(TRANSLATE_LANGS); do \
-		echo "  $$lang"; \
-	done
+	@for lang in $(TRANSLATE_LANGS); do echo "  $$lang"; done
 
 translate-%: $(TARGET)
-	@lang=$*; \
-	if [ ! -f "translate/rec6.810.$$lang.txt" ]; then \
-		echo "Error: Translation file for language '$$lang' not found"; \
-		echo "Available languages: $(TRANSLATE_LANGS)"; \
-		exit 1; \
-	fi; \
-	$(MAKE) translate-810 LANG=$$lang
+	@lang=$*; if [ ! -f "translate/rec6.810.$$lang.txt" ]; then echo "Error: Translation file for language '$$lang' not found"; echo "Available languages: $(TRANSLATE_LANGS)"; exit 1; fi; $(MAKE) translate-810 LANG=$$lang
 
 quiet:
 	@$(MAKE) --no-print-directory all
