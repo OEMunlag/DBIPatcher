@@ -76,7 +76,9 @@ jobs:
       run: |
         brew update
         brew install make zstd
-
+        echo "LDFLAGS=-L$(brew --prefix)/opt/zstd/lib" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I$(brew --prefix)/opt/zstd/include" >> $GITHUB_ENV
+        
     - name: Build for macOS
       run: |
         make clean
