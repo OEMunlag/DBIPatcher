@@ -12,12 +12,17 @@ CFLAGS =-std=gnu11 \
 	-Wno-unused-function
 
 UNAME_S := $(shell uname -s)
+BREW_PREFIX := $(shell if [ "$(UNAME_S)" = "Darwin" ] && command -v brew >/dev/null 2>&1; then brew --prefix; else echo ""; fi)
 
 ifeq ($(UNAME_S),Linux)
     LDLIBS = -lzstd
     EXE_EXT =
 endif
 ifeq ($(UNAME_S),Darwin)
+    ifneq ($(BREW_PREFIX),)
+        CFLAGS += -I$(BREW_PREFIX)/opt/zstd/include
+        LDFLAGS += -L$(BREW_PREFIX)/opt/zstd/lib
+    endif
     LDLIBS = -lzstd
     EXE_EXT =
 endif
@@ -44,7 +49,7 @@ TARGET = $(BINDIR)/dbipatcher$(EXE_EXT)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BUILDDIR) $(BINDIR)
-	$(CC) $(OBJECTS) -o $@ $(LDLIBS)
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) $(LDLIBS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	@mkdir -p $(dir $@)
