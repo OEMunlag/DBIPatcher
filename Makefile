@@ -32,7 +32,12 @@ BUILDDIR = build
 BINDIR = bin
 TEMPDIR = temp
 
-SOURCES = $(shell find $(SRCDIR) -name '*.c')
+# 修复文件查找 - 使用Windows兼容的方法
+ifeq ($(OS),Windows_NT)
+    SOURCES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/*/*.c)
+else
+    SOURCES = $(shell find $(SRCDIR) -name '*.c')
+endif
 
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
 
