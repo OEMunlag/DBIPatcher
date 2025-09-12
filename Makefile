@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS =-std=gnu11 -g -I$(SRCDIR)/inc -Ilibs/zstd/include -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-unused-function
+CFLAGS =-std=gnu11 -g -Isrc/inc -Ilibs/zstd/include -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Wno-unused-function
 
 UNAME_S := $(shell uname -s)
 BREW_PREFIX := $(shell if [ "$(UNAME_S)" = "Darwin" ] && command -v brew >/dev/null 2>&1; then brew --prefix; else echo ""; fi)
@@ -42,9 +42,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS) | $(BUILDDIR) $(BINDIR)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) $(LDLIBS)
-	ifeq ($(OS),Windows_NT)
-		@if [ -f "libs/zstd/dll/zstd.dll" ]; then cp libs/zstd/dll/zstd.dll $(BINDIR)/; fi
-	endif
+	@if [ "$(OS)" = "Windows_NT" ]; then if [ -f "libs/zstd/dll/libzstd.dll" ]; then cp libs/zstd/dll/libzstd.dll $(BINDIR)/; fi; fi
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	@mkdir -p $(dir $@)
@@ -62,7 +60,7 @@ $(TEMPDIR):
 clean:
 	@rm -rf $(BUILDDIR) $(TEMPDIR)
 	@rm -f $(BINDIR)/dbipatcher $(BINDIR)/dbipatcher.exe
-	@rm -f $(BINDIR)/zstd.dll
+	@rm -f $(BINDIR)/libzstd.dll
 
 run: $(TARGET)
 	@$(TARGET)
