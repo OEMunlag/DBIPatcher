@@ -139,7 +139,7 @@ MMV010=Juegos instalados
 MMV011=Limpieza del sistema
 MMV012=Buscar actualizaciones de títulos
 MMV013=Tickets
-MMV014=Guardados
+MMV014=Datos guardados
 MMV015=Ejecutar respondedor MTP
 MMV016=Ejecutar servidor FTP...
 MMV017=Configuración de DBI
@@ -152,8 +152,8 @@ MMV023=Faltan las claves necesarias en el archivo /switch/prod.keys.
 
 Algunas funciones del programa no estarán disponibles.
 
-Reinicie en Hekate y use la carga útil Lockpick_RCM.bin
-para volcar las claves de SysNAND.
+Reinicie en Hekate y ejecute el payload Lockpick_RCM.bin
+para extraer las claves de SysNAND.
 MAIN001=Ocurrió un error:
 MAIN002=Presione cualquier botón para salir
 MAIN003=Ocurrió un error desconocido
